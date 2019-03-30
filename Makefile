@@ -1,20 +1,15 @@
-CC=gcc
-TARGET=main
-SRC=$(wildcard *.c)
+INC=/usr/include/
+LIBS_DIR=/usr/lib/
+LIBS=asound
 
-OBJECT= ${SRC:.c=.o}
-INCLUDES=-I/usr/include/alsa
-LDFLAGS=-lasound
+record: main.o recorder.o
+	g++ -L${LIBS_DIR} -l${LIBS} -I./ -I${INC} main.o recorder.o -o record
 
-all:$(TARGET)
+main.o: main.cpp
+	g++ -L${LIBS_DIR} -l${LIBS} -I./ -I${INC} -c main.cpp -o main.o
 
-$(OBJECT):$(SRC)
-	$(CC) -c $(INCLUDES) $<
-
-$(TARGET):$(OBJECT)
-	$(CC) -o $@ $< $(LDFLAGS)
-
-.PHONY:clean
+record.o: recorder.cpp
+	g++ -L${LIBS_DIR} -l${LIBS} -I./ -I${INC} -c recorder.cpp -o recorder.o
 
 clean:
-	@rm -rf $(OBJECT) $(TARGET) *~
+	rm -rf *.o record
