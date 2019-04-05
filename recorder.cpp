@@ -84,7 +84,7 @@ void record(int time_ms, char** pbuf){
         fprintf(stderr, "short read, read %d frames\n", rc);
       }
       memcpy(cp_pbuf, ptmpbuf, size);
-      printf("[%ld]\tbuffer[0]: %d, buffer frames: %ld\n",loops, *cp_pbuf, frames);
+      printf("[%ld]\tbuffer[0]: 0x%2x, buffer frames: %ld\n",loops, (uint16_t)*cp_pbuf, frames);
       cp_pbuf += size;
     }
 
