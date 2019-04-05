@@ -1,6 +1,6 @@
 #include "recorder.h"
 
-void record(int time_ms, char* pbuf){
+void record(int time_ms, char** pbuf){
     long loops;
     int rc;
     int size;
@@ -13,12 +13,12 @@ void record(int time_ms, char* pbuf){
 
     /* Open PCM device for recording (capture). */
     rc = snd_pcm_open(&handle, HW,
-                        SND_PCM_STREAM_CAPTURE, 0);
+                      SND_PCM_STREAM_CAPTURE, 0);
     if (rc < 0) {
-        fprintf(stderr,
-                "unable to open pcm device: %s\n",
-                snd_strerror(rc));
-		return;
+      fprintf(stderr,
+              "unable to open pcm device: %s\n",
+              snd_strerror(rc));
+      return;
     }
 
     /* Allocate a hardware parameters object. */
@@ -49,10 +49,10 @@ void record(int time_ms, char* pbuf){
     /* Write the parameters to the driver */
     rc = snd_pcm_hw_params(handle, params);
     if (rc < 0) {
-        fprintf(stderr,
-                "unable to set hw parameters: %s\n",
-                snd_strerror(rc));
-		return;
+      fprintf(stderr,
+              "unable to set hw parameters: %s\n",
+              snd_strerror(rc));
+      return;
     }
 
     /* Use a buffer large enough to hold one period */
@@ -64,27 +64,28 @@ void record(int time_ms, char* pbuf){
     snd_pcm_hw_params_get_period_time(params, &val, &dir);//return val(ns)
     loops = time_ms*1000/val;
 
-	/* Allocate memory for pbuf*/
-	pbuf = new char[size * loops];
+    /* Allocate memory for pbuf*/
+    *pbuf = new char[size * loops];
+    char* cp_pbuf = *pbuf;
 
     while (loops > 0) {
-        loops--;
-        rc = snd_pcm_readi(handle, ptmpbuf, frames);
-        if (rc == -EPIPE) {
-          /* EPIPE means overrun */
-          fprintf(stderr, "overrun occurred\n");
-          //prepared again
-		  snd_pcm_prepare(handle);
-        } else if (rc < 0) {
-          fprintf(stderr,
-                  "error from read: %s\n",
-                  snd_strerror(rc));
-        } else if (rc != (int)frames) {
-          fprintf(stderr, "short read, read %d frames\n", rc);
-        }
-		printf("[%d]\tbuffer[0]: %d, buffer frames: %d\n",loops, *ptmpbuf, frames);
-		memcpy(pbuf, ptmpbuf, size);
-		pbuf += size;
+      loops--;
+      rc = snd_pcm_readi(handle, ptmpbuf, frames);
+      if (rc == -EPIPE) {
+        /* EPIPE means overrun */
+        fprintf(stderr, "overrun occurred\n");
+        //prepared again
+        snd_pcm_prepare(handle);
+      } else if (rc < 0) {
+        fprintf(stderr,
+                "error from read: %s\n",
+                snd_strerror(rc));
+      } else if (rc != (int)frames) {
+        fprintf(stderr, "short read, read %d frames\n", rc);
+      }
+      memcpy(cp_pbuf, ptmpbuf, size);
+      printf("[%ld]\tbuffer[0]: %d, buffer frames: %ld\n",loops, *cp_pbuf, frames);
+      cp_pbuf += size;
     }
 
     snd_pcm_drain(handle);

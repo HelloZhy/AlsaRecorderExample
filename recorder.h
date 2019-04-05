@@ -13,6 +13,6 @@
 #define HW		"default"	//hardware id
 
 /*this function will allocate memory for pbuf, so you should pass a null ptr*/
-void record(int time_ms, char* pbuf);
+void record(int time_ms, char** pbuf);
 
 #endif
