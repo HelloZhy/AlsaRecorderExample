@@ -3,13 +3,13 @@ LIBS_DIR=/usr/lib/
 LIBS=asound
 
 record: main.o recorder.o
-	g++ -L${LIBS_DIR} -l${LIBS} -I./ -I${INC} main.o recorder.o -o record
+	g++ -g main.o recorder.o -o record -L${LIBS_DIR} -l${LIBS} -I./ -I${INC}
 
 main.o: main.cpp
-	g++ -L${LIBS_DIR} -l${LIBS} -I./ -I${INC} -c main.cpp -o main.o
+	g++ -g -c main.cpp -o main.o -L${LIBS_DIR} -l${LIBS} -I./ -I${INC}
 
 record.o: recorder.cpp
-	g++ -L${LIBS_DIR} -l${LIBS} -I./ -I${INC} -c recorder.cpp -o recorder.o
+	g++ -g -c recorder.cpp -o recorder.o -L${LIBS_DIR} -l${LIBS} -I./ -I${INC}
 
 clean:
 	rm -rf *.o record
