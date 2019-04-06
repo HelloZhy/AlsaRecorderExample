@@ -1,6 +1,6 @@
 #include "recorder.h"
 
-void record(int time_ms, char** pbuf){
+int record(int time_ms, char** pbuf){
     long loops;
     int rc;
     int size;
@@ -18,7 +18,7 @@ void record(int time_ms, char** pbuf){
       fprintf(stderr,
               "unable to open pcm device: %s\n",
               snd_strerror(rc));
-      return;
+      return -1;
     }
 
     /* Allocate a hardware parameters object. */
@@ -52,7 +52,7 @@ void record(int time_ms, char** pbuf){
       fprintf(stderr,
               "unable to set hw parameters: %s\n",
               snd_strerror(rc));
-      return;
+      return -1;
     }
 
     /* Use a buffer large enough to hold one period */
@@ -65,7 +65,8 @@ void record(int time_ms, char** pbuf){
     loops = time_ms*1000/val;
 
     /* Allocate memory for pbuf*/
-    *pbuf = new char[size * loops];
+    int LENGTH = size * loops;
+    *pbuf = new char[LENGTH];
     char* cp_pbuf = *pbuf;
 
     while (loops > 0) {
@@ -91,4 +92,21 @@ void record(int time_ms, char** pbuf){
     snd_pcm_drain(handle);
     snd_pcm_close(handle);
     free(ptmpbuf);
+    
+    return LENGTH;
+}
+
+complex<double>* extract(uint16_t* pbuf, int len_16){
+  if(!pbuf) return NULL;
+  complex<double>* Xn = new complex<double>[len_16];
+  complex<double>* pXn = Xn;
+  for(int i = 0; i < len_16 / 2; ++i){
+    (*pXn).real((double) pbuf[2 * i]);
+    (*pXn).imag((double) 0);
+    (*(pXn + len_16 / 2)).real((double) pbuf[2 * i + 1]);
+    (*(pXn + len_16 / 2)).imag((double) 0);
+    ++pXn;
+  }
+
+  return Xn;
 }
